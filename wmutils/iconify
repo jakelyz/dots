@@ -1,0 +1,186 @@
+#!/bin/sh
+
+#
+# global vars
+#
+
+# screen dimensions
+RW=$(lsw -r)
+RWH=$(wattr h $RW)
+
+# define icon table dimensions
+ITX=0
+ITY=$RWH
+
+# define icon dimensions, gap between icons, and gap from screen edge
+IW=100
+IGAP=12
+BGAP=12
+BW=4
+
+#
+# functions
+#
+
+usage() {
+	cat << EOF
+usage: $(basename $0) [-h] [-i wid] [-r wid]
+	-h: Shows help
+	-i: Iconifies wid
+	-r: Raises wid
+EOF
+	exit 1
+}
+
+icon_dimensions() {
+	# take image dump of wid to fixed width. determine height from this
+	xwd -silent -id $1 | convert -scale $IW xwd:- png:/tmp/iconify/$1/$1.png
+	IH=$(identify -format "%h" /tmp/iconify/$1/$1.png)
+	
+	# check for existing icons to determine placement, if necessary 
+	if [ $(ls /tmp/iconify/*/icon | wc -l) -gt 0 ]
+	then
+
+		YVALS=""
+		HVALS=""
+
+		for icons in $(ls /tmp/iconify/*/icon)
+		do
+			while IFS=$' ' read x y w h;
+			do
+				YVALS="$YVALS$y:"
+				HVALS="$HVALS$h:"
+			done < $icons
+		done
+
+		# Set max y value equal to zero, before looping
+		MAXY=0
+		# loop through the y values to find greatest, take note of index
+		YINDEX=0
+		IFS=":"
+		for yval in $YVALS
+		do
+			YCOUNT=$(( $YCOUNT+1 ))
+			if [ $yval -gt $MAXY ]
+			then
+				MAXY=$yval
+				YINDEX=$YCOUNT
+			fi
+		done
+
+		# get the height of the icon with greatest y axis
+		for hval in $HVALS
+		do
+			HCOUNT=$(( $HCOUNT+1 ))
+			if [ $HCOUNT -eq $YINDEX ]
+			then
+				MAXH=$hval
+				break
+			fi
+		done
+		
+
+		echo "$(( $ITX + $BGAP )) $(($MAXY + $MAXH + $IGAP)) $IW $IH"
+		return
+	else
+		RET_DIMENSIONS="$(( $ITX + $BGAP )) $(( 0 + $BGAP )) $IW $IH"
+		echo $RET_DIMENSIONS
+		return
+	fi
+
+
+}
+
+set_thumbnail() {
+	# $1 = x, $2 = y, $3 = w, $4  = h
+	# $5 = wid
+
+	feh -g $3x$4+$1+$2 /tmp/iconify/$5/$5.png &
+
+	return
+
+}
+
+rm_thumbnail() {
+	# $1 = wid
+	pkill -f $1.png
+	
+	return
+}
+
+set_icon() {
+	# safety check to ensure this window exists
+	test -z $(lsw | grep $1) && exit 1
+	mkdir -p /tmp/iconify/$1
+	
+	
+	# Teleport to icon
+	ICON_DIMENSIONS=$(icon_dimensions $1)
+	set_thumbnail $ICON_DIMENSIONS $1
+
+	# Save icon x, y, w, h
+	echo $ICON_DIMENSIONS > /tmp/iconify/$1/icon
+
+	# unmap original window to hide it
+	mapw -u $1
+
+	# set window to ignore
+	ignw -s $1
+
+	# focus something else
+	~/.config/wmscripts/focus $(lsw | tail -1)
+
+}
+
+restore_icon() {
+	WIDX=$(wattr x $1)
+	WIDY=$(wattr y $1)
+	WIDWH=$(wattr wh $1)
+	THUMB_DIMENSION="$(( $WIDX + $BW )) $(( $WIDY + $BW )) $WIDWH"
+
+	for icon in $(ls /tmp/iconify/*/icon)
+	do
+		TEST_DIMENSION=$(cat $icon)
+		if [ "$TEST_DIMENSION" = "$THUMB_DIMENSION" ]
+		then
+			ORIGINAL_WID=$(dirname $icon | cut -d '/' -f 4)
+			break
+		fi
+	done	
+	
+	
+	# remap window, remove thumbnail 
+	rm_thumbnail $ORIGINAL_WID
+	mapw -m $ORIGINAL_WID
+	ignw -r $ORIGINAL_WID
+
+	# clean up directories
+	rm -rf /tmp/iconify/$ORIGINAL_WID
+}
+
+#
+# main execution
+#
+
+test $# -eq 0 && usage
+test -d /tmp/iconify || mkdir /tmp/iconify
+
+while getopts "hi:r:" opt
+do
+	case $opt in
+		h)
+		usage
+		;;
+		i)
+		set_icon $OPTARG
+		break
+		;;
+		r)
+		restore_icon $OPTARG
+		break
+		;;
+		?)
+		usage
+		;;
+	esac
+done

@@ -1,0 +1,63 @@
+# Spawn terminal
+alt + Return
+	st
+
+# Move windows
+alt + {h,j,k,l}
+	wmvrpr {-20 0, 0 20, 0 -20, 20 0} $(pfw)
+
+# Resize windows
+alt + shift + {h,j,k,l}
+	wrsrpr {-20 0, 0 20, 0 -20, 20 0} $(pfw)
+
+# Move window to center
+alt + m
+	center
+
+# Enlarge window, respecting gaps
+alt + f
+	fullscreen.sh $(pfw)
+
+# Iconify window
+alt + i
+	iconify -i $(pfw)
+
+# Restore iconified window
+alt + shift + i
+	iconify -r $(pfw)
+
+# Move to next window
+alt + {a,s,w,d}
+	focus $(vroum {west, north, south, east})
+
+# Cycle Next Windows
+alt + Tab
+	focus $(vroum next)
+
+# Cycle Prev Windows
+alt + shift + Tab
+	focus $(vroum prev)
+
+# Kill Focused Window
+alt + x
+	killw $(pfw)
+
+# map groups 1,2,3 (and unmap all others) 
+alt + {1,2,3}
+	groups.sh -M {group1, group2, group3} 
+
+# set wid to group 1,2,3
+alt + shift + {1,2,3}
+	groups.sh -s $(pfw) {group1, group2, group3}
+
+# toggle groups 1,2,3 visibility
+alt + control + {1,2,3}
+	groups.sh -t {group1, group2, group3}
+
+# clean wid from groups
+alt + c
+	groups.sh -c $(pfw)
+
+# raise/lower volume
+super + {F2,F3}
+	volctl {-l 20, -r 20}

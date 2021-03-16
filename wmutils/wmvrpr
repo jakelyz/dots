@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# ensure we aren't moving an iconified window
+WNAME=$(wname $3)
+
+if ! echo $WNAME | grep -q "/tmp/iconify"
+then
+	wmv $1 $2 $3
+fi

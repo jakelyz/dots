@@ -1,0 +1,22 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# User specific environment
+export PATH
+
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+rightprompt(){
+	BRANCH=$(git branch 2>/dev/null | grep "^*" | colrm 1 2)	
+	if [[ $BRANCH != '' ]]
+	then
+		printf "%*s" $COLUMNS "($(git branch 2>/dev/null | grep "^*" | colrm 1 2))"
+	fi
+}
+
+export PS1='\[\033[01;37m\]\[$(tput sc; rightprompt; tput rc)\]\[\033[01;32m\]\u \[\033[01;34m\]>\[\033[00m\] '

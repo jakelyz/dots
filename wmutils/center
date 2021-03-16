@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# get current window id, width and height
+CW=$(pfw)
+CWW=$(wattr w $CW)
+CWH=$(wattr h $CW)
+
+# get screen width and height
+RW=$(lsw -r)
+RWW=$(wattr w $RW)
+RWH=$(wattr h $RW)
+
+# move current window to center of screen, if not iconified window
+WNAME=$(wname $CW)
+
+if ! echo $WNAME | grep -q "/tmp/iconify"
+then
+	wtp $(((RWW - CWW)/2)) $(((RWH-CWH)/2)) $CWW $CWH $CW
+fi

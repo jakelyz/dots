@@ -1,0 +1,58 @@
+#!/bin/sh
+
+#
+# global vars
+#
+
+MAX=255
+CURRENT=$(mixerctl outputs.master | cut -d ',' -f2)
+
+#
+# functions
+#
+
+usage() {
+	cat << EOF
+usage: $(basename $0) [-h] [-r <vol number>] [-l <vol number>]
+	-h: Shows help
+	-r: Raise volume
+	-l: Lower volume
+EOF
+	exit 1
+}
+
+volraise() {
+	NEWVOL=$(( $CURRENT + $1 ))
+	[ $NEWVOL -gt 255 ] && NEWVOL=255
+	mixerctl -w outputs.master=$NEWVOL,$NEWVOL > /dev/null 2>&1  
+}
+
+vollower() {
+	NEWVOL=$(( $CURRENT - $1 ))
+	[ $NEWVOL -lt 0 ] && NEWVOL=0
+	mixerctl -w outputs.master=$NEWVOL,$NEWVOL > /dev/null 2>&1
+}
+
+#
+# main execution
+#
+
+while getopts "hr:l:" opt
+do
+	case $opt in
+		h)
+		usage
+		;;
+		r)
+		volraise $OPTARG
+		break
+		;;
+		l)
+		vollower $OPTARG
+		break
+		;;
+		?)
+		usage
+		;;
+	esac
+done
