@@ -65,8 +65,8 @@
 ;; Set gaps
 (load-module "swm-gaps")
 (setf swm-gaps:*head-gaps-size* 10)
-(setf swm-gaps:*inner-gaps-size* 10)
-(setf swm-gaps:*outer-gaps-size* 10)
+(setf swm-gaps:*inner-gaps-size* 7)
+(setf swm-gaps:*outer-gaps-size* 17)
 (define-key *root-map* (kbd "M-g") "toggle-gaps")
 
 ;; Mode Line Functions
