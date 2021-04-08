@@ -1,0 +1,107 @@
+;; -*-lisp-*-
+
+(in-package :stumpwm)
+(load "~/opt/quicklisp/setup.lisp")
+(setf *shell-program* (getenv "SHELL"))
+(set-module-dir "~/src/stumpwm-contrib")
+
+;; Run default startup tasks
+(run-shell-command "xrdb ~/.Xresources" )
+(run-shell-command "xset +fp ~/.fonts/ctrld-font")
+(run-shell-command "xsetroot -cursor_name left_ptr")
+(run-shell-command "xsetroot -mod 3 3 -bg '#2f1e2e' -fg '#533452'")
+
+;; Colors-n-Borders styling
+(set-fg-color "#e7e9db")
+(set-bg-color "#2f1e2e")
+(set-focus-color "#c2bbb7")
+(set-float-focus-color "#c2bbb7")
+(set-unfocus-color "#2f1e2e")
+(set-float-unfocus-color "#2f1e2e")
+(set-border-color "#c2bbb7")
+(setf *normal-border-width* 3)
+(setf *float-border-width* 3)
+(setf *float-window-title-height* 12)
+(setf *window-border-style* :tight)
+
+(setf *colors* (list "#2f1e2e"   ;; Black
+                     "#dd4482"   ;; Red
+		     "#48b685"   ;; Green
+		     "#8c62ff"   ;; Yellow
+		     "#06b6ef"   ;; Blue
+		     "#815ba4"   ;; Magenta
+		     "#5bc4bf"   ;; Cyan
+		     "#c2bbb7")) ;; White
+
+;; Message and Input Window
+(setf *input-window-gravity* :top)
+(setf *message-window-padding* 10
+      *message-window-y-padding* 7
+      *message-window-gravity* :top-left)
+
+;; Message window font
+(ql:quickload "clx-truetype")
+(load-module "ttf-fonts")
+(xft:cache-fonts)
+(set-font (list
+            (make-instance 'xft:font :family "PxPlus IBM VGA 8x14" :subfamily "Regular" :size 12)
+	    (make-instance 'xft:font :family "BlexMono Nerd Font" :subfamily "Book" :size 10)))
+
+;; change the prefix key to something else
+(set-prefix-key (kbd "C-t"))
+
+
+;; prompt the user for an interactive command. The first arg is an
+;; optional initial contents.
+(defcommand colon1 (&optional (initial "")) (:rest)
+  (let ((cmd (read-one-line (current-screen) ": " :initial-input initial)))
+    (when cmd
+      (eval-command cmd t))))
+
+
+;; Allow click focus
+(setf *mouse-focus-policy* :click)
+
+;; Set gaps
+(load-module "swm-gaps")
+(setf swm-gaps:*head-gaps-size* 10)
+(setf swm-gaps:*inner-gaps-size* 10)
+(setf swm-gaps:*outer-gaps-size* 10)
+(define-key *root-map* (kbd "M-g") "toggle-gaps")
+
+;; Mode Line Functions
+(defun get-battery-status ()
+  (let ((battery-current (run-shell-command "cat /sys/class/power_supply/BAT0/capacity" t)))
+    (substitute #\Space #\Newline battery-current)))
+
+(defun get-last-sync ()
+  (let ((last-sync (run-shell-command "~/bin/lastsync.sh" t)))
+     (substitute #\Space #\Newline last-sync)))
+
+;; Mode line formatting
+(setf *group-format* " %t ")
+(setf *window-format* " %s%n %30t ")
+(setf *mode-line-timeout* 1
+      *mode-line-pad-x* 10
+      *mode-line-pad-y* 7
+      *mode-line-border-width* 0
+      *mode-line-background-color* "#2f1e2e"
+      *mode-line-foreground-color* "#c2bbb7"
+      *mode-line-position* :bottom)
+(setf *screen-mode-line-format*
+   (list 
+     "^f0%g %W"
+     "^>"
+     "^f1 ^f0"'(:eval (get-last-sync))
+     " ^f1 ^f0" '(:eval (get-battery-status))
+     ))
+
+(if (not (head-mode-line (current-head)))
+    (toggle-mode-line (current-screen) (current-head)))
+
+;; Clear rules
+(clear-window-placement-rules)
+
+;; Set groups
+(setf (group-name (car (screen-groups (current-screen)))) "dev" )
+(run-commands "gnewbg irssi" "gnewbg web" "gnewbg-float float")
