@@ -71,17 +71,21 @@
 
 ;; Mode Line Functions
 (defun get-battery-status ()
-  (let ((battery-current (run-shell-command "cat /sys/class/power_supply/BAT0/capacity" t)))
+  (let ((battery-current (run-shell-command "echo $(cat /sys/class/power_supply/BAT0/capacity)%" t)))
     (substitute #\Space #\Newline battery-current)))
 
 (defun get-last-sync ()
   (let ((last-sync (run-shell-command "~/bin/lastsync.sh" t)))
-     (substitute #\Space #\Newline last-sync)))
+    (substitute #\Space #\Newline last-sync)))
+
+(defun get-brightness-level ()
+  (let ((brightness-current (run-shell-command "brightness.sh -c" t)))
+    (substitute #\Space #\Newline brightness-current)))
 
 ;; Mode line formatting
 (setf *group-format* " %t ")
 (setf *window-format* " %s%n %30t ")
-(setf *mode-line-timeout* 1
+(setf *mode-line-timeout* 3
       *mode-line-pad-x* 10
       *mode-line-pad-y* 7
       *mode-line-border-width* 0
@@ -93,7 +97,8 @@
      "^f0%g %W"
      "^>"
      "^f1 ^f0"'(:eval (get-last-sync))
-     " ^f1 ^f0" '(:eval (get-battery-status))
+     "^f1滛 ^f0"'(:eval (get-brightness-level))
+     "^f1 ^f0" '(:eval (get-battery-status))
      ))
 
 (if (not (head-mode-line (current-head)))
@@ -105,3 +110,9 @@
 ;; Set groups
 (setf (group-name (car (screen-groups (current-screen)))) "dev" )
 (run-commands "gnewbg irssi" "gnewbg web" "gnewbg-float float")
+
+;; Custom Keybinds
+(define-key *root-map* (kbd "F11") "exec brightness.sh -i 10 -f decrease")
+(define-key *root-map* (kbd "F12") "exec brightness.sh -i 10 -f increase")
+(define-key *root-map* (kbd "C-F11") "exec brightness.sh -i 5 -f decrease")
+(define-key *root-map* (kbd "C-F12") "exec brightness.sh -i 5 -f increase")
