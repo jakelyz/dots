@@ -1,0 +1,14 @@
+#!/bin/sh
+
+wmlog() {
+  src=$1
+  shift
+  msg=$@
+
+  [ -d ~/var/log ] || mkdir -p ~/var/log
+
+  printf "(`date +'%H:%M:%S %m/%d/%Y'`) - [$src] $msg\n" >> ~/var/log/wmmon.log
+
+}
+
+wmlog $@

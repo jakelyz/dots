@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# Run typical stuff first
+~/.fehbg &
+sxhkd -c ~/.sxhkdrc &
+st tmux &
+sleep 1
+focus `lsw` && center `lsw`
+
+wew | while read -r sta; do
+  sta=`echo $sta | sed "s/\s/ /g"`
+  event=`echo $sta | cut -d ' ' -f1`
+  wid=`echo $sta | cut -d ' ' -f2`
+    
+  wmlog "`basename $0`" "$sta"
+
+  case $event in
+  # WID destroy
+  "DESTROY")	
+    if ! `pfw > /dev/null 2>&1`; then
+      focus `lsw | tail -n1`
+    fi
+  ;;
+  # WID create
+  "CREATE")	
+    focus $wid
+  ;;
+  # WID map
+  "MAP")
+    wattr m $wid && focus $wid
+  ;;
+  # WID unmap
+  "UNMAP")
+    [ `pfw` == $wid ] && focus `lsw | tail -n1` 
+  ;;
+  # WID enter (mouse)
+  "ENTER")	
+  ;;
+  esac
+done
