@@ -1,11 +1,15 @@
 #!/bin/sh
 
 # Run typical stuff first
-~/.fehbg &
+xsetroot -solid '#a89d92'
 sxhkd -c ~/.sxhkdrc &
-st tmux &
-sleep 1
-focus `lsw` && center `lsw`
+xrdb ~/.Xresources &
+#xterm &
+#sleep 1
+#focus `lsw` && center `lsw`
+
+# Set tmux to group 1
+#[ `wname \`pfw\`` == "tmux" ] && groups -s `pfw` group1
 
 wew | while read -r sta; do
   sta=`echo $sta | sed "s/\s/ /g"`

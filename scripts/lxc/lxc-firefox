@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# Wrapper script to start a "firefox" lxc container.
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_CONTAINER=firefox
+_CMD=firefox
+_USER=firefox
+_RUNNING=false
+_CONTAINER_XAUTH_FILE="$HOME/.local/share/lxc/$_CONTAINER/rootfs/home/$_USER/.Xauthority"
+_CURRENT_XAUTH_COOKIE=`xauth list | awk '{print $NF}' | uniq`
+_CONTAINER_XAUTH_COOKIE=`xauth -f $_CONTAINER_XAUTH_FILE list | awk '{print $NF}'`
+
+# Make sure xauth in the firefox container has the current cookie.
+if [ $_CURRENT_XAUTH_COOKIE != $_CONTAINER_XAUTH_COOKIE ]; then
+  rm -v $_CONTAINER_XAUTH_FILE
+  touch $_CONTAINER_XAUTH_FILE
+  xauth -f $_CONTAINER_XAUTH_FILE add $_CONTAINER/unix:0 . `xauth list $DISPLAY | awk '{print $NF}'`
+fi
+
+[ ! `lxc-wait -n $_CONTAINER -s RUNNING -t 0` ] && (lxc-start -n $_CONTAINER && lxc-wait -n $_CONTAINER -s RUNNING && _RUNNING=true)
+
+lxc-attach --clear-env -n $_CONTAINER -- sudo -u firefox -i env DISPLAY=$DISPLAY $_CMD
+
+[ $_RUNNING ] && lxc-stop -n $_CONTAINER -t 10
