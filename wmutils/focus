@@ -4,8 +4,8 @@
 # window focus wrapper that sets borders and can focus next/previous window
 
 BW=${BW:-2}                    # border width
-ACTIVE=${ACTIVE:-0x707880}     # active border color
-INACTIVE=${INACTIVE:-0x2c363a} # inactive border color
+ACTIVE=${ACTIVE:-0x2c363a}     # active border color
+INACTIVE=${INACTIVE:-0x707880} # inactive border color
 
 # get current window id
 CUR=$(pfw)
@@ -25,8 +25,14 @@ setborder() {
     test "$(wattr xywh $2)" = "$(wattr xywh $ROOT)" && return
 
     case $1 in
-        active)   chwb -s $BW -c $ACTIVE $2 ;;
-        inactive) chwb -s $BW -c $INACTIVE $2 ;;
+        active)   
+	  wmlog "`basename $0`" "setting active border for $2"
+	  chwb -s $BW -c $ACTIVE $2
+	;;
+        inactive) 
+	  wmlog "`basename $0`" "setting inactive border for $2"
+	  chwb -s $BW -c $INACTIVE $2
+	;;
     esac
 }
 
@@ -38,7 +44,7 @@ case $1 in
 esac
 
 # exit if we can't find another window to focus
-test -z "$wid" && echo "$(basename $0): can't find a window to focus" >&2 && exit 1
+test -z "$wid" && wmlog "`basename $0`" "can't find a window to focus" && exit 1
 
 setborder inactive $CUR # set inactive border on current window
 setborder active $wid   # activate the new window
