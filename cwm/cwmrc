@@ -5,7 +5,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Font Settings
-#fontname
+fontname		"Sudo:pixelsize=16"
 
 # Window movement settings
 moveamount		10
@@ -68,3 +68,7 @@ bind-key 4-s		window-stick
 bind-key 4-comma	menu-cmd
 bind-key 4-period	menu-window
 bind-key 4-slash	menu-exec
+
+# Mouse binds
+bind-mouse 4-1		window-move
+bind-mouse 4-3		window-resize
