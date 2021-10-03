@@ -1,0 +1,82 @@
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#     CWM Configuration
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Font Settings
+fontname		"SGI Screen:style=Regular:pixelsize=12"
+
+# Window movement settings
+moveamount		10
+
+# Gap in pixels at the edge of the screen
+gap			0 0 0 0
+
+# Window border width
+borderwidth		2
+
+# Colors
+color activeborder	"#8c706a"
+color inactiveborder	"#2a1f1d"
+color menubg		"#8c706a"
+color menufg		"#222222"
+color selfont		"#f0f0f0"
+
+# Ignore windows with these names
+ignore			dmenu
+ignore			dzen2
+
+# Autogroup definitions
+autogroup		3 "Firefox"
+
+# Define commands for menu-cmd
+command xterm		xterm
+command firefox		firefox
+
+# Unbind all default mappings
+unbind-key all
+
+# New key bindings
+bind-key CM-r		restart
+bind-key CM-q		quit
+bind-key CM-l		xlock
+bind-key 4-x		window-close
+bind-key 4-Return	xterm	
+bind-key 4-f		window-fullscreen
+bind-key 4-h		window-move-left-big
+bind-key 4-j		window-move-down-big
+bind-key 4-k		window-move-up-big
+bind-key 4-l		window-move-right-big
+bind-key 4S-h		window-resize-left-big
+bind-key 4S-j		window-resize-down-big
+bind-key 4S-k		window-resize-up-big
+bind-key 4S-l		window-resize-right-big
+bind-key 4S-Up		window-snap-up
+bind-key 4S-Down	window-snap-down
+bind-key 4S-Left	window-snap-left
+bind-key 4S-Right	window-snap-right
+bind-key 4-Tab		window-cycle
+bind-key 4S-Tab		window-rcycle
+bind-key 4S-1		window-movetogroup-1
+bind-key 4S-2		window-movetogroup-2
+bind-key 4S-3		window-movetogroup-3
+bind-key 4S-4		window-movetogroup-4
+bind-key 4S-5		window-movetogroup-5
+bind-key 4-1		group-only-1
+bind-key 4-2		group-only-2
+bind-key 4-3		group-only-3
+bind-key 4-4		group-only-4
+bind-key 4-5		group-only-5
+bind-key 4-Right	group-cycle
+bind-key 4-Left		group-rcycle
+bind-key 4-g		window-group
+bind-key 4-a		group-toggle-all
+bind-key 4-s		window-stick
+bind-key 4-comma	menu-cmd
+bind-key 4-period	menu-window
+bind-key 4-slash	menu-exec
+
+# Mouse binds
+bind-mouse 4-1		window-move
+bind-mouse 4-3		window-resize
