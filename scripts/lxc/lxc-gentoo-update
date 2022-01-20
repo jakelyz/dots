@@ -1,0 +1,30 @@
+#!/bin/bash
+
+_CONTAINER=$1
+
+function _attachRun() {
+  lxc-attach --clear-env -n $_CONTAINER -- $1
+}
+
+function _emergeUpdate() {
+  sleep 8
+
+  local _cmds=("emerge --sync" "emerge -uvDN --keep-going @world" \
+  "emerge --depclean" "eselect news read" "etc-update")
+
+  for cmd in "${_cmds[@]}"; do
+    _attachRun "$cmd"
+  done
+
+}
+
+if ! $(lxc-wait -n $_CONTAINER -s RUNNING -t 0); then
+  _previousState="STOPPED"
+  lxc-start -n $_CONTAINER && lxc-wait -n $_CONTAINER -s RUNNING
+else
+  _previousState="RUNNING"
+fi
+
+_emergeUpdate
+
+[[ $_previousState == "STOPPED" ]] && lxc-stop -n $_CONTAINER 
