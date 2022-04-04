@@ -1,0 +1,8 @@
+! xterm
+xterm*faceName			: Screen:style=Regular:pixelsize=14
+!xterm*font			: xft:PxPlus IBM EGA 8x14:style=Regular:pixelsize=16
+xterm*internalBorder		: 10
+xterm*allowBoldFonts		: false
+
+! colors
+#include "/home/jlyz/.x/colors/BirdsOfParadise.Xresources"

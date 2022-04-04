@@ -1,0 +1,102 @@
+;; -*-lisp-*-
+
+(in-package :stumpwm)
+(setf *shell-program* (getenv "SHELL"))
+
+;; Run default startup tasks
+(run-shell-command "xrdb ~/.Xresources")
+(run-shell-command "xsetroot -bitmap ~/.x/bitmaps/ubalu -bg '#735a56'")
+(run-shell-command "xsetroot -cursor_name left_ptr")
+(run-shell-command "xset b off")
+(run-shell-command "xset +fp ~/.fonts/sgi")
+
+;; Colors-n-Borders styling
+(set-fg-color "#e0dbb7")
+(set-bg-color "#2a1f1d")
+(set-focus-color "#8c706a")
+(set-float-focus-color "#8c706a")
+(set-unfocus-color "#2a1f1d")
+(set-float-unfocus-color "#2a1f1d")
+(set-border-color "#8c706a")
+(setf *normal-border-width* 3)
+(setf *float-border-width* 3)
+(setf *float-window-title-height* 12)
+(setf *window-border-style* :tight)
+
+(setf *colors* (list "#573d26"   ;; Black
+                     "#be2d26"   ;; Red
+		     "#6ba18a"   ;; Green
+		     "#e99d2a"   ;; Yellow
+		     "#5a86ad"   ;; Blue
+		     "#ac80a6"   ;; Magenta
+		     "#74a6ad"   ;; Cyan
+		     "#e0dbb7")) ;; White
+
+;; Message and Input Window
+(setf *input-window-gravity* :top)
+(setf *message-window-padding* 10
+      *message-window-y-padding* 7
+      *message-window-gravity* :top-left)
+
+;; Message window font
+(set-font "-sgi-screen-medium-r-normal-*-12-*-*-*-*-*-*-*")
+
+;; change the prefix key to something else
+(set-prefix-key (kbd "C-t"))
+
+
+;; prompt the user for an interactive command. The first arg is an
+;; optional initial contents.
+(defcommand colon1 (&optional (initial "")) (:rest)
+  (let ((cmd (read-one-line (current-screen) ": " :initial-input initial)))
+    (when cmd
+      (eval-command cmd t))))
+
+
+;; Allow click focus
+(setf *mouse-focus-policy* :click)
+
+;; Mode Line Functions
+(defun get-battery-status ()
+  (let ((battery-current (run-shell-command "echo `cat /sys/class/power_supply/BAT0/capacity`%" t)))
+    (substitute #\Space #\Newline battery-current)))
+
+(defun get-memory-usage ()
+  (let ((memory-usage (run-shell-command "free -m | head -2 | tail -1 | awk '{printf(\"%4i/%3i\",$3,$2)}'" t)))
+    (substitute #\Space #\Newline memory-usage)))
+
+;; Mode line formatting
+(setf *group-format* " %t ")
+(setf *window-format* " %s%n %30t ")
+(setf *mode-line-timeout* 3
+      *mode-line-pad-x* 10
+      *mode-line-pad-y* 7
+      *mode-line-border-width* 0
+      *mode-line-background-color* "#2a1f1d"
+      *mode-line-foreground-color* "#e0dbb7"
+      *mode-line-position* :bottom)
+(setf *screen-mode-line-format*
+   (list 
+     "^f0%g %W"
+     "^>"
+     '(:eval (get-memory-usage))
+     "  "
+     '(:eval (get-battery-status))
+     ))
+
+(if (not (head-mode-line (current-head)))
+    (toggle-mode-line (current-screen) (current-head)))
+
+;; Clear rules
+(clear-window-placement-rules)
+
+;; Set groups
+(setf (group-name (car (screen-groups (current-screen)))) "one" )
+(run-commands "gnewbg two" "gnewbg three" "gnewbg-float float")
+
+;; Custom Keybinds
+;;(define-key *root-map* (kbd "F11") "exec brightness.sh -i 10 -f decrease")
+;;(define-key *root-map* (kbd "F12") "exec brightness.sh -i 10 -f increase")
+;;(define-key *root-map* (kbd "C-F11") "exec brightness.sh -i 5 -f decrease")
+;;(define-key *root-map* (kbd "C-F12") "exec brightness.sh -i 5 -f increase")
+
